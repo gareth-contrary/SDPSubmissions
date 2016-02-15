@@ -1,9 +1,14 @@
 package sml;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
+import java.util.Properties;
 import java.util.Scanner;
 
 /*
@@ -11,7 +16,7 @@ import java.util.Scanner;
  */
 public class Translator {
 
-    private static final String PATH = "C:/Users/Gareth/workspace/cw-one/src/";
+    private static final String PATH = "C:/Users/Gareth/git/SDPSubmissions/cw-one/src/";
     // word + line is the part of the current line that's not yet processed
     // word has no whitespace
     // If word and line are not empty, line begins with whitespace
@@ -77,8 +82,23 @@ public class Translator {
         int s2;
         int r;
         int x;
-        //Possible label for a bnz instruction.
+        //Label for a bnz instruction.
         String l2;
+        
+        //Properties object for determining correct instruction.
+        Properties properties = new Properties();
+        
+        //String for holding instruction's class name.
+        String instructionClass;
+        
+        //Constructor for instruction class.
+        Constructor constructor;
+        
+        Class cls;
+        
+        try {
+			properties.load(new FileInputStream("C:/Users/Gareth/git/SDPSubmissions/cw-one/src/sml/instruction.properties"));
+		
 
         if (line.equals(""))
             return null;
@@ -89,37 +109,76 @@ public class Translator {
                 r = scanInt();
                 s1 = scanInt();
                 s2 = scanInt();
-                return new AddInstruction(label, r, s1, s2);
+                instructionClass = properties.getProperty("add.class");
+                cls = Class.forName(instructionClass); 
+                constructor = cls.getConstructor(new Class[] {String.class, int.class, int.class, int.class});
+                return (Instruction) constructor.newInstance(new Object[] {label, r, s1, s2});
             case "lin":
                 r = scanInt();
                 s1 = scanInt();
-                return new LinInstruction(label, r, s1);
+                instructionClass = properties.getProperty("lin.class");
+                cls = Class.forName(instructionClass); 
+                constructor = cls.getConstructor(new Class[] {String.class, int.class, int.class});
+                return (Instruction) constructor.newInstance(new Object[] {label, r, s1});
             case "sub":
                 r = scanInt();
                 s1 = scanInt();
                 s2 = scanInt();
-                return new SubInstruction(label, r, s1, s2);
+                instructionClass = properties.getProperty("sub.class");
+                cls = Class.forName(instructionClass); 
+                constructor = cls.getConstructor(new Class[] {String.class, int.class, int.class, int.class});
+                return (Instruction) constructor.newInstance(new Object[] {label, r, s1, s2});
             case "mul":
                 r = scanInt();
                 s1 = scanInt();
                 s2 = scanInt();
-                return new MulInstruction(label, r, s1, s2);
+                instructionClass = properties.getProperty("mul.class");
+                cls = Class.forName(instructionClass); 
+                constructor = cls.getConstructor(new Class[] {String.class, int.class, int.class, int.class});
+                return (Instruction) constructor.newInstance(new Object[] {label, r, s1, s2});
             case "div":
                 r = scanInt();
                 s1 = scanInt();
                 s2 = scanInt();
-                return new DivInstruction(label, r, s1, s2);
+                instructionClass = properties.getProperty("div.class");
+                cls = Class.forName(instructionClass); 
+                constructor = cls.getConstructor(new Class[] {String.class, int.class, int.class, int.class});
+                return (Instruction) constructor.newInstance(new Object[] {label, r, s1, s2});
             case "out":
                 r = scanInt();
-                return new OutInstruction(label, r);
+                instructionClass = properties.getProperty("out.class");
+                cls = Class.forName(instructionClass); 
+                constructor = cls.getConstructor(new Class[] {String.class, int.class});
+                return (Instruction) constructor.newInstance(new Object[] {label, r});
             case "bnz":
                 r = scanInt();
                 l2 = scan();
-                return new BnzInstruction(label, r, l2);
+                instructionClass = properties.getProperty("bnz.class");
+                cls = Class.forName(instructionClass); 
+                constructor = cls.getConstructor(new Class[] {String.class, int.class, String.class});
+                return (Instruction) constructor.newInstance(new Object[] {label, r, l2});
         }
 
-        // You will have to write code here for the other instructions.
-
+        } catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {  
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} 
+        
         return null;
     }
 
